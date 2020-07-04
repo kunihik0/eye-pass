@@ -3,8 +3,8 @@
 
 """
 discription
-show eyes's horizontal line and vetical line.
-display "blinking" text when I blink. 
+extract only eye
+exclude other element by blackening
 
 """
 
