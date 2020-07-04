@@ -1,6 +1,12 @@
 # https://www.youtube.com/watch?v=VWUgkcX_KoY
 # part1
 
+"""
+discription
+show eye's horizontal line and vetical line.
+
+"""
+
 import cv2
 import numpy as np
 import dlib
