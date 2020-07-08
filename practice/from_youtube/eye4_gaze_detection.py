@@ -3,8 +3,8 @@
 
 """
 discription
-show eyes's horizontal line and vetical line.
 display "blinking" text when I blink.
+judge eye's direction ,left or right or center
 
 """
 
@@ -48,16 +48,18 @@ def get_blinking_ratio(eye_points, facial_landmarks):
 
 def get_gaze_ratio(eye_points, facial_landmarks):
     # Gaze detection
-    left_eye_resion = np.array([(facial_landmarks.part(0).x, facial_landmarks.part(0).y),
-                                (facial_landmarks.part(1).x,
-                                 facial_landmarks.part(1).y),
-                                (facial_landmarks.part(2).x,
-                                 facial_landmarks.part(2).y),
-                                (facial_landmarks.part(3).x,
-                                 facial_landmarks.part(3).y),
-                                (facial_landmarks.part(4).x,
-                                 facial_landmarks.part(4).y),
-                                (facial_landmarks.part(5).x, facial_landmarks.part(5).y)],
+    left_eye_resion = np.array([(facial_landmarks.part(eye_points[0]).x,
+                                 facial_landmarks.part(eye_points[0]).y),
+                                (facial_landmarks.part(eye_points[1]).x,
+                                 facial_landmarks.part(eye_points[1]).y),
+                                (facial_landmarks.part(eye_points[2]).x,
+                                 facial_landmarks.part(eye_points[2]).y),
+                                (facial_landmarks.part(eye_points[3]).x,
+                                 facial_landmarks.part(eye_points[3]).y),
+                                (facial_landmarks.part(eye_points[4]).x,
+                                 facial_landmarks.part(eye_points[4]).y),
+                                (facial_landmarks.part(eye_points[5]).x,
+                                 facial_landmarks.part(eye_points[5]).y)],
                                np.int32)
     # cv2.polylines(frame, [left_eye_resion], True, (0, 0, 255), 2)
 
@@ -70,18 +72,18 @@ def get_gaze_ratio(eye_points, facial_landmarks):
     # 目ん玉塗りつぶす
     cv2.fillPoly(mask, [left_eye_resion], 255)
     # gray(顔全体)を目の部分だけ抽出
-    left_eye = cv2.bitwise_and(gray, gray, mask=mask)
+    eye = cv2.bitwise_and(gray, gray, mask=mask)
 
     # 目を長方形windowで抜き出し
     min_x = np.min(left_eye_resion[:, 0])
     max_x = np.max(left_eye_resion[:, 0])
     min_y = np.min(left_eye_resion[:, 1])
     max_y = np.max(left_eye_resion[:, 1])
-    gray_eye = left_eye[min_y: max_y, min_x:max_x]
+    gray_eye = eye[min_y: max_y, min_x:max_x]
 
     # 白黒にするための閾値を決めて（今回は70）、全体を白黒にする
     _, threshold_eye = cv2.threshold(
-        gray_eye, 70, 255, cv2.THRESH_BINARY)
+        gray_eye, 55, 255, cv2.THRESH_BINARY)
 
     height, width = threshold_eye.shape
     left_side_threshold = threshold_eye[0:height, 0:int(width/2)]
@@ -98,46 +100,6 @@ def get_gaze_ratio(eye_points, facial_landmarks):
     return gaze_ratio
 
 
-def get_gaze_average_ratio(faces, print_text='left'):
-    count = 0
-    sum_gaze_ratio = 0
-    # while count < 120:  # (10*30)*3=120 10:移行時間
-    #     _, frame = cap.read()
-    #     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #     faces = detector(gray)
-    for face in faces:
-        x, y = face.left(), face.top()
-        x1, y1 = face.right(), face.bottom()
-        cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
-
-        landmarks = predictor(gray, face)
-
-        gaze_ratio_left_eye = get_gaze_ratio(left_eye_points, landmarks)
-        gaze_ratio_right_eye = get_gaze_ratio(right_eye_points, landmarks)
-        gaze_ratio = (gaze_ratio_left_eye+gaze_ratio_right_eye)/2
-        if count >= 30:
-            sum_gaze_ratio += gaze_ratio
-            count += 1
-
-        cv2.putText(frame, str(gaze_ratio),
-                    (50, 150), font, 2, (0, 0, 255), 3)
-
-        cv2.putText(frame, print_text,
-                    (50, 100), font, 2, (0, 0, 255), 3)
-        count += 1
-        if count >= 120:
-            break
-
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
-
-    gaze_average_ratio = sum_gaze_ratio/90
-
-    return gaze_average_ratio
-
-
 cap = cv2.VideoCapture(1)
 
 detector = dlib.get_frontal_face_detector()
@@ -150,33 +112,14 @@ left_eye_points = [36, 37, 38, 39, 40, 41]
 right_eye_points = [42, 43, 44, 45, 46, 47]
 
 
-default_ratio = [1.2, 1.7]
-left_gaze_average_ratio = default_ratio[0]
-right_gaze_avarage_ratio = default_ratio[1]
-
-
-shatter = int(input())
-if shatter != 0:
-    while True:  # (10*30)*3=120 10:移行時間
-        _, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = detector(gray)
-        left_gaze_average_ratio = get_gaze_average_ratio(
-            faces=faces, print_text="left")
-
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1)
-        # if key == 27:
-        break
-
-
-shatter = int(input())
-if shatter != 0:
-    right_gaze_avarage_ratio = get_gaze_average_ratio("right")
+default_ratio = [1.0, 2.4]
+right_gaze_average_ratio = default_ratio[0]
+left_gaze_avarage_ratio = default_ratio[1]
 
 
 while True:
     _, frame = cap.read()
+    new_frame = np.zeros((500, 500, 3), np.uint8)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
     for face in faces:
@@ -199,19 +142,22 @@ while True:
         gaze_ratio_right_eye = get_gaze_ratio(right_eye_points, landmarks)
         gaze_ratio = (gaze_ratio_left_eye+gaze_ratio_right_eye)/2
 
-        if gaze_ratio <= left_gaze_average_ratio:
-            cv2.putText(frame, "left",
-                        (50, 100), font, 2, (0, 0, 255), 3)
-        elif left_gaze_average_ratio < gaze_ratio < right_gaze_avarage_ratio:
-            cv2.putText(frame, "center",
-                        (50, 100), font, 2, (0, 0, 255), 3)
-        else:
+        if gaze_ratio <= right_gaze_average_ratio:
             cv2.putText(frame, "right",
                         (50, 100), font, 2, (0, 0, 255), 3)
-        cv2.putText(frame, str(gaze_ratio_left_eye),
+            new_frame[:] = (0, 0, 255)
+        elif right_gaze_average_ratio < gaze_ratio < left_gaze_avarage_ratio:
+            cv2.putText(frame, "center",
+                        (50, 100), font, 2, (0, 0, 255), 3)
+            new_frame[:] = (255, 0, 0)
+        else:
+            cv2.putText(frame, "left",
+                        (50, 100), font, 2, (0, 0, 255), 3)
+        cv2.putText(frame, str(gaze_ratio),
                     (50, 150), font, 2, (0, 0, 255), 3)
 
     cv2.imshow("Frame", frame)
+    cv2.imshow("new_frame", new_frame)
     key = cv2.waitKey(1)
     if key == 27:
         break
