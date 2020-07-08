@@ -3,8 +3,8 @@
 
 """
 discription
-show eyes's horizontal line and vetical line.
 display "blinking" text when I blink.
+judge eye's direction ,left or right or center
 
 """
 
