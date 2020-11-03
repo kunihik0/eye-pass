@@ -104,7 +104,7 @@ while True:
 
         # 白黒にするための閾値を決めて（今回は70）、全体を白黒にする
         _, threshold_eye = cv2.threshold(
-            gray_eye, 55, 255, cv2.THRESH_BINARY)
+            gray_eye, 80, 255, cv2.THRESH_BINARY)
 
         threshold_eye = cv2.resize(threshold_eye, None, fx=5, fy=5)
         eye = cv2.resize(gray_eye, None, fx=5, fy=5)
