@@ -8,12 +8,24 @@ judge eye's direction ,left or right or center
 
 """
 
-
 from math import hypot
+import os
+import sys
+import time
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append("~/OldDesk/法政/コバゼミ/eye/eye_git/eye-pass/practice/tools")
+
+import cv2
 import dlib
 import numpy as np
-import cv2
 
+from tools._data2csv import data2csv
+
+args = sys.argv
+csv_file_name = "test.csv"
+if len(args) > 1:
+    csv_file_name = args[1] + ".csv"
 
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
@@ -131,6 +143,7 @@ default_vertical_ratio = [1.3, 3.0]
 lower_gaze_average_ratio = default_vertical_ratio[0]
 upper_gaze_avarage_ratio = default_vertical_ratio[1]
 
+start_time = time.time() 
 
 while True:
     _, frame = cap.read()
@@ -192,6 +205,14 @@ while True:
                         (950, 100), font, 2, (0, 0, 255), 3)
         cv2.putText(frame, str(gaze_vertical_ratio),
                     (950, 150), font, 2, (0, 0, 255), 3)
+
+        elapsed_time=time.time()-start_time
+        # csv fileに保存
+        data_list = [elapsed_time, gaze_side_ratio, gaze_vertical_ratio, blinking_ratio]
+        csv_file_path = "../output_data/" + csv_file_name
+        header = ["time","gaze_side_ratio", "gaze_vertical_ratio", "blinking_ratio"]
+        data2csv(data_list=data_list,
+                 csv_file_path=csv_file_path, header=header)
 
     cv2.imshow("Frame", frame)
     cv2.imshow("new_frame", new_frame)
