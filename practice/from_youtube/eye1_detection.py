@@ -15,7 +15,7 @@ cap = cv2.VideoCapture(1)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(
-    "../items/shape_predictor_68_face_landmarks.dat")
+    "../../items/shape_predictor_68_face_landmarks.dat")
 
 
 def midpoint(p1, p2):

@@ -1,5 +1,5 @@
-# https://www.youtube.com/watch?v=HRvTKc_HIBA&list=PL6Yc5OUgcoTlvHb5OfFLUJ90ofBuoU5g8&index=5
-# part5
+# https://www.youtube.com/watch?v=-VVih_oJ3jc&list=PL6Yc5OUgcoTlvHb5OfFLUJ90ofBuoU5g8&index=4
+# part4
 
 """
 discription
@@ -9,19 +9,23 @@ judge eye's direction ,left or right or center
 """
 
 from math import hypot
+import os
+import sys
+import time
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append("~/OldDesk/法政/コバゼミ/eye/eye_git/eye-pass/practice/tools")
+
+import cv2
 import dlib
 import numpy as np
-import cv2
 
-keyboard = np.zeros((1000, 1500, 3), np.uint8)
+from tools._data2csv import data2csv
 
-# keys
-cv2.rectangle(keyboard, (0, 0), (200, 200), (255, 0,))
-
-cv2.imshow("keyboard", keyboard)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
+args = sys.argv
+csv_file_name = "test.csv"
+if len(args) > 1:
+    csv_file_name = args[1] + ".csv"
 
 def midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
@@ -91,7 +95,7 @@ def get_gaze_ratio(eye_points, facial_landmarks):
 
     # 白黒にするための閾値を決めて（今回は70）、全体を白黒にする
     _, threshold_eye = cv2.threshold(
-        gray_eye, 55, 255, cv2.THRESH_BINARY)
+        gray_eye, 80, 255, cv2.THRESH_BINARY)
 
     height, width = threshold_eye.shape
     left_side_threshold = threshold_eye[0:height, 0:int(width/2)]
@@ -101,18 +105,29 @@ def get_gaze_ratio(eye_points, facial_landmarks):
     right_side_white = cv2.countNonZero(right_side_threshold)
 
     try:
-        gaze_ratio = left_side_white/right_side_white
+        gaze_side_ratio = left_side_white/right_side_white
     except ZeroDivisionError:
-        gaze_ratio = left_side_white/(1e-4)
+        gaze_side_ratio = left_side_white/(1e-4)
 
-    return gaze_ratio
+    upper_side_threshold = threshold_eye[int(height/2):height, 0:width]
+    upper_side_white = cv2.countNonZero(upper_side_threshold)
+
+    lower_side_threshold = threshold_eye[0:int(height/2), 0:width]
+    lower_side_white = cv2.countNonZero(lower_side_threshold)
+
+    try:
+        gaze_vertical_ratio = upper_side_white/lower_side_white
+    except ZeroDivisionError:
+        gaze_vertical_ratio = upper_side_white/(1e-4)
+
+    return gaze_side_ratio, gaze_vertical_ratio
 
 
 cap = cv2.VideoCapture(1)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(
-    "../../items/shape_predictor_68_face_landmarks.dat")
+    "../items/shape_predictor_68_face_landmarks.dat")
 
 font = cv2.FONT_HERSHEY_PLAIN
 
@@ -120,10 +135,15 @@ left_eye_points = [36, 37, 38, 39, 40, 41]
 right_eye_points = [42, 43, 44, 45, 46, 47]
 
 
-default_ratio = [1.0, 2.4]
-right_gaze_average_ratio = default_ratio[0]
-left_gaze_avarage_ratio = default_ratio[1]
+default_side_ratio = [1.0, 2.4]
+right_gaze_average_ratio = default_side_ratio[0]
+left_gaze_average_ratio = default_side_ratio[1]
 
+default_vertical_ratio = [1.3, 3.0]
+lower_gaze_average_ratio = default_vertical_ratio[0]
+upper_gaze_avarage_ratio = default_vertical_ratio[1]
+
+start_time = time.time() 
 
 while True:
     _, frame = cap.read()
@@ -146,23 +166,53 @@ while True:
             cv2.putText(frame, "Blinking", (50, 150), font, 7, (255, 0, 0))
 
         # Gaze Detection
-        gaze_ratio_left_eye = get_gaze_ratio(left_eye_points, landmarks)
-        gaze_ratio_right_eye = get_gaze_ratio(right_eye_points, landmarks)
-        gaze_ratio = (gaze_ratio_left_eye+gaze_ratio_right_eye)/2
+        gaze_side_ratio_left_eye, gaze_vertical_ratio_left_eye = \
+            get_gaze_ratio(left_eye_points, landmarks)
+        gaze_side_ratio_right_eye, gaze_vertical_ratio_right_eye = \
+            get_gaze_ratio(right_eye_points, landmarks)
 
-        if gaze_ratio <= right_gaze_average_ratio:
+        gaze_side_ratio = (
+            gaze_side_ratio_left_eye + gaze_side_ratio_right_eye)/2
+        gaze_vertical_ratio = (
+            gaze_vertical_ratio_left_eye+gaze_vertical_ratio_right_eye)/2
+
+        # 画面右側：横の動き判定
+        if gaze_side_ratio <= right_gaze_average_ratio:
             cv2.putText(frame, "right",
                         (50, 100), font, 2, (0, 0, 255), 3)
             new_frame[:] = (0, 0, 255)
-        elif right_gaze_average_ratio < gaze_ratio < left_gaze_avarage_ratio:
+        elif right_gaze_average_ratio < gaze_side_ratio < left_gaze_average_ratio:
             cv2.putText(frame, "center",
                         (50, 100), font, 2, (0, 0, 255), 3)
             new_frame[:] = (255, 0, 0)
         else:
             cv2.putText(frame, "left",
                         (50, 100), font, 2, (0, 0, 255), 3)
-        cv2.putText(frame, str(gaze_ratio),
+        cv2.putText(frame, str(gaze_side_ratio),
                     (50, 150), font, 2, (0, 0, 255), 3)
+
+        # 画面左側：縦の動き判定
+        if gaze_vertical_ratio <= lower_gaze_average_ratio:
+            cv2.putText(frame, "lower",
+                        (950, 100), font, 2, (0, 0, 255), 3)
+            new_frame[:] = (0, 0, 255)
+        elif lower_gaze_average_ratio < gaze_vertical_ratio < upper_gaze_avarage_ratio:
+            cv2.putText(frame, "center",
+                        (950, 100), font, 2, (0, 0, 255), 3)
+            new_frame[:] = (255, 0, 0)
+        else:
+            cv2.putText(frame, "upper",
+                        (950, 100), font, 2, (0, 0, 255), 3)
+        cv2.putText(frame, str(gaze_vertical_ratio),
+                    (950, 150), font, 2, (0, 0, 255), 3)
+
+        elapsed_time=time.time()-start_time
+        # csv fileに保存
+        data_list = [elapsed_time, gaze_side_ratio, gaze_vertical_ratio, blinking_ratio]
+        csv_file_path = "../output_data/" + csv_file_name
+        header = ["time","gaze_side_ratio", "gaze_vertical_ratio", "blinking_ratio"]
+        data2csv(data_list=data_list,
+                 csv_file_path=csv_file_path, header=header)
 
     cv2.imshow("Frame", frame)
     cv2.imshow("new_frame", new_frame)
