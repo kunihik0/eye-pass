@@ -1,5 +1,5 @@
 .DS_Store
-
+output_data/
 # Initially taken from Github's Python gitignore file
 
 # Byte-compiled / optimized / DLL files
