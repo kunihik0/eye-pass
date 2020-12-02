@@ -12,7 +12,8 @@ import cv2
 import dlib
 import numpy as np
 
-from tools.tool_from_youtube import midpoint, get_blinking_ratio, get_gaze_ratio
+#from tools.tool_from_youtube import midpoint, get_blinking_ratio, get_gaze_ratio
+from tools.getter import get_midpoint, get_blinking_ratio, get_gaze_ratio
 
 class Detector(object):
     def __init__(self,frame,gray,landmarks):
