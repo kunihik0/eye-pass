@@ -1,5 +1,4 @@
 from math import hypot
-import dlib
 import numpy as np
 import cv2
 

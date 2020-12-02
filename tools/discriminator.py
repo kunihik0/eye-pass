@@ -1,5 +1,3 @@
-from copy import copy
-from math import hypot
 import os
 import sys
 import time
@@ -19,8 +17,6 @@ class Discriminator(object):
         self.font=cv2.FONT_HERSHEY_PLAIN  
         self.frame=frame
         self.landmarks=landmarks
-        #self.left_eye_points=left_eye_points
-        #self.right_eye_points=right_eye_points
 
     def side_discriminator(self,new_frame,default_side_ratio,gaze_side_ratio):
         right_gaze_average_ratio = default_side_ratio[0]

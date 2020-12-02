@@ -1,16 +1,8 @@
-from copy import copy                                                                      
-from math import hypot
 import os                
 import sys               
-import time              
-                         
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append("../")
 sys.path.append("../tools/")                                   
-                         
-import cv2               
-import dlib              
-import numpy as np       
                          
 from tools.detector import Detector
 from tools.discriminator import Discriminator

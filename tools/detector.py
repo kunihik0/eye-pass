@@ -1,5 +1,3 @@
-from copy import copy
-from math import hypot
 import os
 import sys
 import time
@@ -12,7 +10,6 @@ import cv2
 import dlib
 import numpy as np
 
-#from tools.tool_from_youtube import midpoint, get_blinking_ratio, get_gaze_ratio
 from tools.getter import get_midpoint, get_blinking_ratio, get_gaze_ratio
 
 class Detector(object):
