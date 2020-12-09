@@ -1,11 +1,9 @@
-
 from math import hypot
-import dlib
 import numpy as np
 import cv2
 
 
-def midpoint(p1, p2):
+def get_midpoint(p1, p2):
     return int((p1.x + p2.x)/2), int((p1.y + p2.y)/2)
 
 
@@ -16,9 +14,9 @@ def get_blinking_ratio(eye_points, facial_landmarks):
         eye_points[3]).x, facial_landmarks.part(eye_points[3]).y)
 
     # point
-    center_top = midpoint(facial_landmarks.part(
+    center_top = get_midpoint(facial_landmarks.part(
         eye_points[1]), facial_landmarks.part(eye_points[2]))
-    center_bottom = midpoint(facial_landmarks.part(
+    center_bottom = get_midpoint(facial_landmarks.part(
         eye_points[5]), facial_landmarks.part(eye_points[4]))
 
     # line
@@ -97,4 +95,3 @@ def get_gaze_ratio(frame, gray, eye_points, facial_landmarks):
         gaze_vertical_ratio = upper_side_white/(1e-4)
 
     return gaze_side_ratio, gaze_vertical_ratio
-

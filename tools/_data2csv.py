@@ -30,16 +30,18 @@ def data2csv(data_list, csv_file_path="/tmp", header=[]):
             if len(header) > 0:
                 writer.writerow(header)
             else:
-                header = [i for i in range(len(data_list))]
+                header = [i for i in range(len(data_list[0]))]
                 writer.writerow(header)
+
+            writer.writerows(data_list)
 
     else:
         with open(csv_file_path, 'a') as f:
             writer = csv.writer(f)
-            writer.writerow(data_list)
+            writer.writerows(data_list)
 
     print(is_new_file)
 
 
-data2csv(data_list=[0, 2],
-         csv_file_path="../output_data/test.csv")
+#data2csv(data_list=[0, 2],
+#         csv_file_path="../output_data/test.csv")
