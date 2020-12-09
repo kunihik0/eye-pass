@@ -8,6 +8,7 @@ judge eye's direction ,left or right or center
 
 """
 
+from collections import deque
 import os
 import sys
 import time
@@ -39,6 +40,17 @@ default_side_ratio = [1.0, 2.4]
 
 default_vertical_ratio = [1.3, 3.0]
 
+directions_list = deque([
+                  ["middle","middle"],
+                  ["top","middle"],
+                  ["top","right"],
+                  ["middle","right"],
+                  ["bottom","right"],
+                  ["bottom","middle"],
+                  ["bottom","left"],
+                  ["middle","left"],
+                  ["top","left"]])
+
 start_time = time.time() 
 data_list=[]
 while True:
@@ -66,8 +78,17 @@ while True:
     cv2.imshow("Frame", frame)
     cv2.imshow("new_frame", new_frame)
     key = cv2.waitKey(1)
+    if key > 0 and key!=27:
+        if directions_list:
+            phase=directions_list.popleft()
+            data_list.append(["vertical",phase[0],"side",phase[1]])
+            print("vertical",phase[0],"side",phase[1])
+        else:
+            key=27
+
     if key == 27:
         break
+
 print(data_list)
 csv_file_path = "../output_data/" + csv_file_name
 header = ["time","gaze_side_ratio", "gaze_vertical_ratio", "blinking_ratio"]
