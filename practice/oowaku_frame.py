@@ -40,7 +40,7 @@ default_side_ratio = [1.0, 2.4]
 default_vertical_ratio = [1.3, 3.0]
 
 start_time = time.time() 
-
+data_list=[]
 while True:
     _, frame = cap.read()
     new_frame = np.zeros((500, 500, 3), np.uint8)
@@ -61,17 +61,18 @@ while True:
 
         elapsed_time=time.time()-start_time
         # csv fileに保存
-        data_list = [elapsed_time, gaze_side_ratio, gaze_vertical_ratio, blinking_ratio]
-        csv_file_path = "../output_data/" + csv_file_name
-        header = ["time","gaze_side_ratio", "gaze_vertical_ratio", "blinking_ratio"]
-        data2csv(data_list=data_list,
-                 csv_file_path=csv_file_path, header=header)
+        data_list.append([elapsed_time, gaze_side_ratio, gaze_vertical_ratio, blinking_ratio])
 
     cv2.imshow("Frame", frame)
     cv2.imshow("new_frame", new_frame)
     key = cv2.waitKey(1)
     if key == 27:
         break
+print(data_list)
+csv_file_path = "../output_data/" + csv_file_name
+header = ["time","gaze_side_ratio", "gaze_vertical_ratio", "blinking_ratio"]
+data2csv(data_list=data_list,
+         csv_file_path=csv_file_path, header=header)
 
 
 cap.release()
