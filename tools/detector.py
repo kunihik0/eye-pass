@@ -41,3 +41,5 @@ class Detector(object):
 
         return gaze_side_ratio, gaze_vertical_ratio
 
+    def key_detector(self,key):
+        pass
