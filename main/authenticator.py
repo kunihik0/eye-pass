@@ -1,4 +1,4 @@
-
+import csv
 from collections import deque
 import os
 import sys
@@ -11,15 +11,17 @@ sys.path.append("../tools/")
 import cv2
 import dlib
 import numpy as np
+import pandas as pd
 
 from tools._data2csv import data2csv, data2new_csv
 from tools.indicator import Indicator
-from tools.answer_extractor import make_answer
+from tools.answer_authenticator import Answer_Authenticator
 
 args = sys.argv
-csv_file_name = "test.csv"
+answer_file_name = "answer.csv"
 if len(args) > 1:
-    csv_file_name = args[1] + ".csv"
+    answer_file_name = args[1] + ".csv"
+answer_file_path = "../answer_data/" + answer_file_name
 
 cap = cv2.VideoCapture(1)
 
@@ -31,14 +33,11 @@ default_side_ratio = [1.0, 2.4]
 
 default_vertical_ratio = [1.3, 3.0]
 
-directions_list = deque([
-                  "x1","x2","x3","x4","x5","x6","x7","x8","x9","x10",
-                  ])
+directions_list = deque(["authentication"])
 
 start_time = time.time() 
 data_list = []
 data_dict = {}
-type_count = 0
 is_first = True
 is_collecting_data = False
 phase=None
@@ -105,4 +104,18 @@ for key in data_dict.keys():
 cap.release()
 cv2.destroyAllWindows()
 
-make_answer()
+answer_list = []
+with open(answer_file_path) as f:
+    reader = csv.reader(f)
+    answer_list = [row for row in reader]
+threshold_ave, threshold_std = answer_list.pop(0)
+df_answer = pd.DataFrame(answer_list, dtype = float)
+np_answer = df_answer.iloc[:,1:4].values
+threshold = float(threshold_ave) - float(threshold_std)
+
+
+df_auth = pd.read_csv("../answer_data/authentication.csv")
+np_auth = df_auth.iloc[:,1:4].values
+
+ans_auth = Answer_Authenticator()
+ans_auth.authenticator(np_answer, np_auth, threshold)
