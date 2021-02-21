@@ -24,11 +24,6 @@ def data2new_csv(data_list, csv_file_path="/tmp", header=[]):
     with open(csv_file_path, 'w') as f:
         writer = csv.writer(f)
 
-        if len(header) > 0:
-            writer.writerow(header)
-        else:
-            header = [i for i in range(len(data_list[0]))]
-            writer.writerow(header)
 
         writer.writerows(data_list)
 
@@ -59,11 +54,11 @@ def data2csv(data_list, csv_file_path="/tmp", header=[]):
         with open(csv_file_path, 'w') as f:
             writer = csv.writer(f)
 
-            if len(header) > 0:
-                writer.writerow(header)
-            else:
-                header = [i for i in range(len(data_list[0]))]
-                writer.writerow(header)
+#            if len(header) > 0:
+#                writer.writerow(header)
+#            else:
+#                header = [i for i in range(len(data_list[0]))]
+#                writer.writerow(header)
 
             writer.writerows(data_list)
 
