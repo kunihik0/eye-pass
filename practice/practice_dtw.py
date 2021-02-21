@@ -20,13 +20,12 @@ n_false_win=0
 false_list=[]
 diff_list=[]
 for i in range(1,11):
-    
-    ans_df = pd.read_csv("../output_data/"+dir_name+"/x"+str(i)+".csv")
+    ans_df = pd.read_csv("../sample/"+dir_name+"/x"+str(i)+".csv")
+    ans_np = ans_df.iloc[:,1:4].values
     for j in range(1,11):
         if i==j:
             continue
-        x_df = pd.read_csv("../output_data/"+dir_name+"/x"+str(j)+".csv")
-        ans_np = ans_df.iloc[:,1:4].values
+        x_df = pd.read_csv("../sample/"+dir_name+"/x"+str(j)+".csv")
         x_np = x_df.iloc[:,1:4].values
         evaluator = Evaluator()
 

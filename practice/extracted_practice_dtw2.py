@@ -31,18 +31,18 @@ for dir_name in x_dict.keys():
     csv_file_path="../items/"+output_name+".csv"
     x_list=x_dict[dir_name]
     all_list=[]
-    for i in x_list:
+    for i in range(1,11):
         print(i)
-        x1_df = pd.read_csv("../output_data/"+dir_name+"/x"+str(i)+".csv")
+        x1_df = pd.read_csv("../sample/"+dir_name+"/x"+str(i)+".csv")
         x1_np = x1_df.iloc[:,1:4].values
         tmp_list=[]
-        for j in x_list:
+        for j in range(1,11):
             if i==j:
                 print("###")
                 tmp_list.append(None)
                 continue
 
-            x2_df=pd.read_csv("../output_data/"+dir_name+"/x"+str(j)+".csv")
+            x2_df=pd.read_csv("../sample/"+dir_name+"/x"+str(j)+".csv")
             x2_np=x2_df.iloc[:,1:4].values
             
             dtw_x1_x2 = evaluator.calc_dtw(x1_np, x2_np, evaluator.l2norm)    
@@ -52,5 +52,5 @@ for dir_name in x_dict.keys():
 
     tmp_df=pd.DataFrame(all_list)
     all_df=pd.concat([all_df,tmp_df])
-all_df.to_csv("../items/all.csv")
+all_df.to_csv("../items/all2.csv")
 "print(all_df.iloc[:,:])"
